@@ -1,5 +1,3 @@
-library(testthat)
-
 .Random.seed <<- .ext.seed
 
 test_that("kmeanspp", {

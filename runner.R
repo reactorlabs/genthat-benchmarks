@@ -1,3 +1,5 @@
+library(testthat)
+
 # Adapted from genthat::test_generated_file
 # https://github.com/PRL-PRG/genthat/blob/43c7b4b/R/run-generated-tests.R#L3L14
 loadEnv <- function(test) {
