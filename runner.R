@@ -1,17 +1,43 @@
-library(testthat)
-
 # Adapted from genthat::test_generated_file
 # https://github.com/PRL-PRG/genthat/blob/43c7b4b/R/run-generated-tests.R#L3L14
 loadEnv <- function(test) {
+    test_env <- function() {
+        new.env(parent = globalenv())
+    }
+
     ext_file <- file.path(dirname(test), paste0(tools::file_path_sans_ext(basename(test)), ".ext"))
     env <- if (file.exists(ext_file)) {
         ext <- readRDS(ext_file)
-        parent.env(ext) <- testthat::test_env()
+        parent.env(ext) <- test_env()
         ext
     } else {
-        testthat::test_env()
+        test_env()
     }
     env
+}
+
+# Adapted from testthat::source_file
+# https://github.com/r-lib/testthat/blob/9d6ae66/R/source.R#L15L45
+test_file <- function(path, env) {
+    stopifnot(file.exists(path))
+    stopifnot(is.environment(env))
+
+    lines <- readLines(path, encoding = "UTF-8", warn = FALSE)
+    srcfile <- srcfilecopy(path, lines, file.info(path)[1, "mtime"], isFile = TRUE)
+
+    ## We need to parse from a connection, because parse() has a bug,
+    ## and converts the input to the native encoding, if the text arg is used
+    con <- textConnection(lines, encoding = "UTF-8")
+    on.exit(try(close(con), silent = TRUE), add = TRUE)
+    exprs <- parse(con, n = -1, srcfile = srcfile, encoding = "UTF-8")
+
+    n <- length(exprs)
+    if (n == 0L) return(invisible())
+
+    old_dir <- setwd(dirname(path))
+    on.exit(setwd(old_dir), add = TRUE)
+
+    invisible(eval(exprs, new.env(parent = env)))
 }
 
 runTest <- function(test, iterations, warmup) {
@@ -19,19 +45,18 @@ runTest <- function(test, iterations, warmup) {
 
     # warmup
     for (i in 1:warmup) {
-        testthat::source_dir(test, env=env)
+        test_file(test, env = env)
     }
 
     # benchmark and time
     inner <- function(iterations) {
         for (i in 1:iterations) {
-            testthat::source_dir(test, env=env)
+            test_file(test, env = env)
         }
     }
     system.time(inner(iterations))[[3]] * 1000
 }
 
-# TODO: simplify test running, try to bypass testthat
 run <- function(args) {
     if (length(args) < 1 || length(args) > 3) {
         stop(printUsage())
