@@ -1,0 +1,4 @@
+*.Rprofile
+*.swp
+Rplots.pdf
+.Rhistory
