@@ -63,7 +63,7 @@ run <- function(args) {
     }
 
     path <- args[[1]]
-    iterations <- 100
+    iterations <- 15
     warmup <- 5
 
     if (length(args) >= 2) {
@@ -74,7 +74,7 @@ run <- function(args) {
     }
 
     time <- runTest(path, iterations, warmup)
-    cat(sprintf("%50s    %9.2f ms\n", path, time))
+    cat(sprintf("%50s    %9.0f ms\n", path, time))
 }
 
 printUsage <- function() {
@@ -82,7 +82,7 @@ printUsage <- function() {
     cat("\n")
     cat("    test       - path to the test file; if path is a directory, run\n")
     cat("                 all tests in that directory\n")
-    cat("    iterations - number of iterations to run the test, default: 100\n")
+    cat("    iterations - number of iterations to run the test, default: 15\n")
     cat("    warmup     - number of iterations for warmup, default: 5\n")
     cat("\n")
 }
