@@ -1,3 +1,14 @@
+# Taken from https://diego.assencio.com/?index=86c137b502561d44b8be02f06d80ee16
+pause <- function() {
+    if (interactive()) {
+        invisible(readline(prompt = "Press <Enter> to continue..."))
+    }
+    else {
+        cat("Press <Enter> to continue...")
+        invisible(readLines(file("stdin"), 1))
+    }
+}
+
 # Adapted from genthat::test_generated_file
 # https://github.com/PRL-PRG/genthat/blob/43c7b4b/R/run-generated-tests.R#L3L14
 loadEnv <- function(test) {
@@ -18,7 +29,7 @@ loadEnv <- function(test) {
 
 # Adapted from testthat::source_file
 # https://github.com/r-lib/testthat/blob/9d6ae66/R/source.R#L15L45
-test_file <- function(path, env) {
+testFile <- function(path, env) {
     stopifnot(file.exists(path))
     stopifnot(is.environment(env))
 
@@ -45,13 +56,14 @@ runTest <- function(test, iterations, warmup) {
 
     # warmup
     for (i in 1:warmup) {
-        test_file(test, env = env)
+        testFile(test, env = env)
     }
+    # pause()
 
     # benchmark and time
     inner <- function(iterations) {
         for (i in 1:iterations) {
-            test_file(test, env = env)
+            testFile(test, env = env)
         }
     }
     system.time(inner(iterations))[[3]] * 1000
